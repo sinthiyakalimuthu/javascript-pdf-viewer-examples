@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--Refer scripts and styles from CDN-->
+    <script
+      src="https://cdn.syncfusion.com/ej2/20.2.48/dist/ej2.min.js"
+      type="text/javascript">
+    </script>
+    
+    <link
+      href="https://cdn.syncfusion.com/ej2/20.2.48/material.css"
+      rel="stylesheet"/>
+
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+      rel="stylesheet"/>
+
+    <style>
+      body {
+        touch-action: none;
+      }
+    </style>  
+</head>
+<body>    
+    <div class="control-section">
+      <button id="click">Click Here</button>
+      <div class="content-wrapper">
+         <!--Add the PDF Viewer-->
+        <div id="pdfViewer" style="height: 640px; width: 100%"></div>
+      </div>
+    </div>
+   <script>
+      var viewer = new ej.pdfviewer.PdfViewer();
+      viewer.serviceUrl = 'https://ej2services.syncfusion.com/production/web-services/api/pdfviewer';
+      viewer.appendTo('#pdfViewer');
+      viewer.load('FormFillingDocument.pdf', null);
+      viewer.enableFormFieldsValidation = true;
+      viewer.showNotificationDialog = false;
+      viewer.validateFormFields = function (args) {
+      var errorMessage = 'Required Field(s): ';
+      var forms = viewer.formFieldCollections;
+      var flag = false;
+      var radioGroupName = '';
+      for (var i = 0; i < forms.length; i++) {
+        var text = '';
+        if (forms[i].isRequired == true) {
+          if (
+            forms[i].type.toString() == 'Checkbox' &&
+            forms[i].isChecked == false
+          ) {
+            text = forms[i].name;
+          } else if (forms[i].type == 'RadioButton' && flag == false) {
+            radioGroupName = forms[i].name;
+            if (forms[i].isSelected == true) flag = true;
+          } else if (
+            forms[i].type.toString() != 'Checkbox' &&
+            forms[i].type != 'RadioButton' &&
+            forms[i].value == ''
+          ) {
+            text = forms[i].name;
+          }
+          if (text != '') {
+            if (errorMessage == 'Required Field(s): ') {
+              errorMessage += text;
+            } else {
+              errorMessage += ', ' + text;
+            }
+          }
+        }
+      }
+  if (!flag && radioGroupName != '') {
+    if (errorMessage == 'Required Field(s): ') errorMessage += radioGroupName;
+    else errorMessage += ', ' + radioGroupName;
+  }
+  if (errorMessage != 'Required Field(s): ') {
+    //Method to display the popup window.
+    viewer.showNotificationPopup(errorMessage);
+  }
+};
+//Method to bring the form fields in focus.
+document.getElementById('click').addEventListener('click', function () {
+  var formField = viewer.retrieveFormFields();
+  viewer.focusFormField(formField[1]);
+});
+//Method to bring the form fields in focus while loading.
+viewer.documentLoad = (args) => {
+  var formField = viewer.retrieveFormFields();
+  viewer.focusFormField(formField[1]);
+};
+
+   </script>
+</body>
+</html>
